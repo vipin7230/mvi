@@ -3,6 +3,7 @@ package com.vicky7230.mvi.ui.screens.home
 import com.vicky7230.mvi.data.network.model.Todo
 
 sealed class HomeState {
+    data object Idle : HomeState()
     data object Loading : HomeState()
     data object Error : HomeState()
     data object Success : HomeState()
@@ -10,14 +11,14 @@ sealed class HomeState {
 
 sealed class HomeEvent {
     data object OnLoading : HomeEvent()
-    data object OnError : HomeEvent()
-    data object OnSuccess : HomeEvent()
+    data class OnError(val error: String) : HomeEvent()
+    data class OnSuccess(val list: List<Todo>) : HomeEvent()
 }
 
 sealed class HomeSideEffect {
     data object Loading : HomeSideEffect()
-    data object Error : HomeSideEffect()
-    data object Success : HomeSideEffect()
+    data class Error(val error: String) : HomeSideEffect()
+    data class Success(val list: List<Todo>) : HomeSideEffect()
 }
 
 data class HomeUiState(

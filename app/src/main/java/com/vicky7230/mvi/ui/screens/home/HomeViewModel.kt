@@ -2,28 +2,83 @@ package com.vicky7230.mvi.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.JsonElement
 import com.vicky7230.mvi.data.Repository
 import com.vicky7230.mvi.data.network.api.NetworkResult
-import com.vicky7230.mvi.utils.parseTodoList
+import com.vicky7230.mvi.data.network.model.Todo
+import com.vicky7230.mvi.stateMachine.StateMachine
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.syntax.simple.intent
+import org.orbitmvi.orbit.syntax.simple.reduce
+import org.orbitmvi.orbit.viewmodel.container
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: Repository
-) : ViewModel() {
+) : ViewModel(), ContainerHost<HomeUiState, Nothing> {
 
-    private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    override val container =
+        container<HomeUiState, Nothing>(HomeUiState())
+
+    private val stateMachine = StateMachine.create<HomeState, HomeEvent, HomeSideEffect> {
+        initialState(HomeState.Idle)
+
+        state<HomeState.Idle> {
+            on<HomeEvent.OnLoading> {
+                transitionTo(HomeState.Loading, HomeSideEffect.Loading)
+            }
+        }
+
+        state<HomeState.Loading> {
+            on<HomeEvent.OnError> {
+                transitionTo(HomeState.Error, HomeSideEffect.Error(it.error))
+            }
+            on<HomeEvent.OnSuccess> {
+                transitionTo(HomeState.Success, HomeSideEffect.Success(it.list))
+            }
+        }
+
+        state<HomeState.Success> {}
+        state<HomeState.Error> {
+            on<HomeEvent.OnLoading> {
+                transitionTo(HomeState.Loading, HomeSideEffect.Loading)
+            }
+        }
+
+        onTransition {
+            val validTransition = it as? StateMachine.Transition.Valid ?: return@onTransition
+
+            Timber.tag("FSM").e("\n=================================================")
+            Timber.tag("FSM").e("From State: ${it.fromState}")
+            Timber.tag("FSM").e("Event Fired = ${it.event::class.simpleName}")
+            Timber.tag("FSM").e("State Transitioned to: ${it.toState}")
+
+            when (val effect = validTransition.sideEffect as HomeSideEffect) {
+                is HomeSideEffect.Loading -> intent { reduce { state.copy(loading = true) } }
+                is HomeSideEffect.Error -> intent {
+                    reduce {
+                        state.copy(
+                            loading = false,
+                            error = effect.error
+                        )
+                    }
+                }
+
+                is HomeSideEffect.Success -> intent {
+                    reduce {
+                        state.copy(
+                            error = "null",
+                            loading = false,
+                            todos = effect.list
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     init {
         getTodos()
@@ -37,48 +92,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateState(networkResult: NetworkResult<JsonElement>) {
+    private fun updateState(networkResult: NetworkResult<List<Todo>>) {
         when (networkResult) {
             is NetworkResult.Loading -> {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        loading = true
-                    )
-                }
+                stateMachine.transition(HomeEvent.OnLoading)
             }
 
             is NetworkResult.Success -> {
-                val listJson = networkResult.data
-                withContext(Dispatchers.IO) {
-                    val deserializedList = parseTodoList(listJson)
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            error = "null",
-                            loading = false,
-                            todos = deserializedList,
-                        )
-                    }
-                }
+                stateMachine.transition(HomeEvent.OnSuccess(networkResult.data))
             }
 
             is NetworkResult.Error -> {
-                var errorMessage = networkResult.message
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        loading = false,
-                        error = errorMessage!!
-                    )
-                }
+                stateMachine.transition(HomeEvent.OnError(networkResult.message!!))
             }
 
             is NetworkResult.Exception -> {
-                var exceptionMessage = networkResult.throwable.localizedMessage
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        loading = false,
-                        error = exceptionMessage!!
-                    )
-                }
+                stateMachine.transition(HomeEvent.OnError(networkResult.throwable.localizedMessage!!))
             }
         }
     }

@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vicky7230.mvi.data.network.model.Todo
 import com.vicky7230.mvi.ui.common.LoadingUi
+import org.orbitmvi.orbit.compose.collectAsState
 import timber.log.Timber
 
 @Composable
@@ -42,7 +43,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val homeUiState by homeViewModel.collectAsState()
 
     if (homeUiState.loading) {
         LoadingUi()

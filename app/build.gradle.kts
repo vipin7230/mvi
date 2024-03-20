@@ -91,6 +91,12 @@ dependencies {
 
     implementation("com.jakewharton.timber:timber:5.0.1")
 
+    implementation("org.orbit-mvi:orbit-core:6.1.1")
+    // or, if on Android:
+    implementation("org.orbit-mvi:orbit-viewmodel:6.1.1")
+    // If using Jetpack Compose include
+    implementation("org.orbit-mvi:orbit-compose:6.1.1")
+
     // retrofit
     implementation(libs.retrofit)
     implementation(libs.gson)
