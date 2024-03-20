@@ -1,9 +1,9 @@
 package com.vicky7230.mvi.di
 
 import com.vicky7230.mvi.BuildConfig
-import com.vicky7230.mvi.data.network.api.Api
-import com.vicky7230.mvi.data.network.api.BASE_URL
-import com.vicky7230.mvi.data.network.interceptor.JsonPrettyPrintInterceptor
+import com.vicky7230.mvi.common.Constants
+import com.vicky7230.mvi.data.remote.JsonPrettyPrintInterceptor
+import com.vicky7230.mvi.data.remote.TodoApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,7 +45,7 @@ class NetworkModule {
     @Singleton
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder().baseUrl(BASE_URL)
+        return Retrofit.Builder().baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -55,7 +55,7 @@ class NetworkModule {
     @Provides
     fun provideApi(
         retrofit: Retrofit,
-    ): Api {
-        return retrofit.create(Api::class.java)
+    ): TodoApi {
+        return retrofit.create(TodoApi::class.java)
     }
 }

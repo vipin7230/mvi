@@ -1,9 +1,7 @@
 package com.vicky7230.mvi.di
 
-import com.vicky7230.mvi.data.Repository
-import com.vicky7230.mvi.data.RepositoryImp
-import com.vicky7230.mvi.data.network.ApiHelper
-import com.vicky7230.mvi.data.network.ApiHelperImp
+import com.vicky7230.mvi.data.repository.TodoRepositoryImpl
+import com.vicky7230.mvi.domain.repository.TodoRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,10 +13,6 @@ import javax.inject.Singleton
 abstract class ApplicationModule {
     @Binds
     @Singleton
-    abstract fun bindRepository(repositoryImp: RepositoryImp): Repository
-
-    @Binds
-    @Singleton
-    abstract fun bindApiHelper(apiHelperImp: ApiHelperImp): ApiHelper
+    abstract fun bindRepository(todoRepositoryImp: TodoRepositoryImpl): TodoRepository
 
 }
