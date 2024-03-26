@@ -1,7 +1,9 @@
 package com.vicky7230.mvi.data.dto
 
 import com.vicky7230.mvi.domain.model.Todo
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TodoDto(
     val userId: Int,
     val id: Int,

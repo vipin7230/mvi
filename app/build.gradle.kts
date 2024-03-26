@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.hiltAndroid)
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -99,12 +100,15 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1-Beta")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 
     // retrofit
     implementation(libs.retrofit)
     implementation(libs.gson)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.okhttp3.logging.interceptor)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.10.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
