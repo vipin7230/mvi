@@ -1,6 +1,8 @@
 package com.vicky7230.mvi.presentation.state
 
 import com.vicky7230.mvi.presentation.stateMachine.StateMachine
+import com.vicky7230.mvi.presentation.stateMachine.StateMachineContainer
+import com.vicky7230.mvi.presentation.stateMachine.onValidSideEffect
 
 class HomeStateMachine(
     private val onTransitionEffect: (effect: HomeSideEffect) -> Unit,
@@ -14,12 +16,6 @@ class HomeStateMachine(
             initialState(initialState)
 
             state<HomeUiState.Idle> {
-                on<HomeEvent.StartLoading> {
-                    dontTransition(
-                        sideEffect = HomeSideEffect.StartLoading
-                    )
-                }
-
                 on<HomeEvent.OnLoading> {
                     transitionTo(
                         state = HomeUiState.Loading,
@@ -48,9 +44,10 @@ class HomeStateMachine(
             }
 
             state<HomeUiState.Error> {
-                on<HomeEvent.StartLoading> {
-                    dontTransition(
-                        sideEffect = HomeSideEffect.StartLoading
+                on<HomeEvent.OnLoading> {
+                    transitionTo(
+                        state = HomeUiState.Loading,
+                        sideEffect = HomeSideEffect.Loading
                     )
                 }
             }

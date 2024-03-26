@@ -1,7 +1,6 @@
-package com.vicky7230.mvi.presentation.state
+package com.vicky7230.mvi.presentation.stateMachine
 
-import android.util.Log
-import com.vicky7230.mvi.presentation.stateMachine.StateMachine
+import timber.log.Timber
 
 class LoggingStateMachineContainer<STATE : Any, EVENT : Any, SIDE_EFFECT : Any>(
     private val actual: StateMachineContainer<STATE, EVENT, SIDE_EFFECT>
@@ -13,15 +12,26 @@ class LoggingStateMachineContainer<STATE : Any, EVENT : Any, SIDE_EFFECT : Any>(
     override val stateMachine: StateMachine<STATE, EVENT, SIDE_EFFECT> = actual.stateMachine.with {
         onTransition { transition ->
             if (transition is StateMachine.Transition.Valid) {
-                Log.d(
+                /*Log.d(
                     stateMachineName,
                     "{{==from==}} ${transition.fromState} {{==on==}} ${transition.event} {{==to==}} ${transition.toState}"
-                )
+                )*/
+
+                Timber.tag("FSM").e("\n=================================================")
+                Timber.tag("FSM").e("From State: ${transition.fromState}")
+                Timber.tag("FSM").e("Event Fired = ${transition.event}")
+                Timber.tag("FSM").e("State Transitioned to: ${transition.toState}")
+
             } else {
-                Log.w(
+                /*Log.w(
                     stateMachineName,
                     "{{==from==}} ${transition.fromState} {{==on==}} ${transition.event} {{==to==}} <invalid>"
-                )
+                )*/
+
+                Timber.tag("FSM").e("\n=================================================")
+                Timber.tag("FSM").e("From State: ${transition.fromState}")
+                Timber.tag("FSM").e("Event Fired = ${transition.event}")
+                Timber.tag("FSM").e("State Transitioned to: <invalid>")
             }
         }
     }

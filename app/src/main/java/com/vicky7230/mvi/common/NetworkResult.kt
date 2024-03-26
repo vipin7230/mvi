@@ -7,5 +7,5 @@ sealed class NetworkResult<out T : Any> {
 
     class Exception<T : Any>(val throwable: Throwable) : NetworkResult<T>()
 
-    data object Loading : NetworkResult<Nothing>()
+    //data object Loading : NetworkResult<Nothing>()
 }

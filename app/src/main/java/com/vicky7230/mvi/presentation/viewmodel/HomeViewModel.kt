@@ -3,7 +3,6 @@ package com.vicky7230.mvi.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import com.vicky7230.mvi.BuildConfig
 import com.vicky7230.mvi.common.NetworkResult
-import com.vicky7230.mvi.data.dto.TodoDto
 import com.vicky7230.mvi.domain.model.Todo
 import com.vicky7230.mvi.domain.usecase.GetTodosUseCase
 import com.vicky7230.mvi.presentation.state.HomeEvent
@@ -11,11 +10,12 @@ import com.vicky7230.mvi.presentation.state.HomeSideEffect
 import com.vicky7230.mvi.presentation.state.HomeStateMachine
 import com.vicky7230.mvi.presentation.state.HomeUiState
 import com.vicky7230.mvi.presentation.state.HomeUiSideEffect
-import com.vicky7230.mvi.presentation.state.withLoggingIf
+import com.vicky7230.mvi.presentation.stateMachine.withLoggingIf
 import com.vicky7230.mvi.presentation.stateMachine.StateMachine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
+import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
 import timber.log.Timber
@@ -31,16 +31,17 @@ class HomeViewModel @Inject constructor(
 
     private val stateMachine = HomeStateMachine(onTransitionEffect = { sideEffect ->
         when (sideEffect) {
-            is HomeSideEffect.StartLoading -> intent {
-                getTodosUseCase().collect { result: NetworkResult<List<Todo>> ->
-                    updateState(result)
-                }
+            is HomeSideEffect.Loading -> intent {
+                val response = getTodosUseCase()
+                updateState(response)
                 Timber.e("I am trying to see if this works....")
             }
-
-            is HomeSideEffect.Loading -> {}
-            is HomeSideEffect.Error -> {}
-            is HomeSideEffect.Success -> {}
+            is HomeSideEffect.Error -> intent{
+                postSideEffect(HomeUiSideEffect.SuccessToast(sideEffect.error))
+            }
+            is HomeSideEffect.Success -> intent{
+                postSideEffect(HomeUiSideEffect.SuccessToast("Data retrieved successfully"))
+            }
         }
     }).withLoggingIf { BuildConfig.DEBUG }
 
@@ -61,15 +62,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getTodos() {
-        sendEventForTransition(HomeEvent.StartLoading)
+        sendEventForTransition(HomeEvent.OnLoading)
     }
 
     private fun updateState(networkResult: NetworkResult<List<Todo>>) {
         when (networkResult) {
-            is NetworkResult.Loading -> {
-                sendEventForTransition(HomeEvent.OnLoading)
-            }
-
             is NetworkResult.Success -> {
                 sendEventForTransition(HomeEvent.OnSuccess(networkResult.data))
             }

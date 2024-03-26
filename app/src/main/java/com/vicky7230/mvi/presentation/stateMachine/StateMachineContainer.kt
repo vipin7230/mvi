@@ -1,6 +1,4 @@
-package com.vicky7230.mvi.presentation.state
-
-import com.vicky7230.mvi.presentation.stateMachine.StateMachine
+package com.vicky7230.mvi.presentation.stateMachine
 
 interface StateMachineContainer<STATE: Any, EVENT: Any, SIDE_EFFECT:Any> {
 
