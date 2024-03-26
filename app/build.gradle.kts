@@ -97,6 +97,9 @@ dependencies {
     // If using Jetpack Compose include
     implementation("org.orbit-mvi:orbit-compose:6.1.1")
 
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1-Beta")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
+
     // retrofit
     implementation(libs.retrofit)
     implementation(libs.gson)
