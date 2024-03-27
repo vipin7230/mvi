@@ -17,7 +17,7 @@ class GetTodosUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): NetworkResult<List<Todo>> {
         return try {
-            val response = todoRepository.getTodos().map { it.toTodo() }
+            val response = todoRepository.getTodos()
             NetworkResult.Success(response)
         } catch (httpException: HttpException) {
             Timber.e(httpException)
